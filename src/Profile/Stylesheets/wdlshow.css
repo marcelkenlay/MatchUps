@@ -1,0 +1,17 @@
+#wdl table {
+  width: 50%;
+
+  margin-left: auto;
+  margin-right: auto;
+
+  table-layout: fixed;
+}
+
+#wdl td {
+  font-size: 2vmin;
+}
+
+#wdl h1 {
+  font-size: 7vmin;
+  margin: 0;
+}

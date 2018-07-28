@@ -1,0 +1,67 @@
+#pagewrapper {
+  /* Sizing */
+  display: table-cell;
+  vertical-align: middle;
+  position:fixed;
+
+  /* Aesthetics */
+}
+
+#splashwrapper {
+  /* Sizing */
+  width: 50%;
+  height: 50%;
+  margin: 0;
+  padding: 2%;
+  position: fixed;
+  top: 25%;
+
+  vertical-align: middle;
+  margin-left: 25%;
+  margin-right: 25%;
+
+  /* Aesthetics */
+  text-align: center;
+}
+
+#titlewrapper {
+  /* background-color: #333333; */
+
+}
+
+#splashwrapper h1 {
+  width: 100%;
+  font-size: 12.5vmin;
+  margin-bottom: 0;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  color:white;
+}
+
+#splashwrapper h3 {
+  margin-top: 10px;
+  font-size: 4vmin;
+
+  animation-name: fade;
+  animation-duration: 1s;
+  animation-direction: alternate;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in;
+}
+
+@keyframes fade {
+  from {color: #444}
+  to   {color: #EEE}
+}
+
+#newuserlink {
+  color: white;
+  font-size: 2vmin;
+}
+
+
+#splashwrapper .form-control {
+  margin-left: auto;
+  margin-right: auto;
+  width: 70%;
+}

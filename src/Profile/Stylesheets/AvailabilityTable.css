@@ -1,0 +1,51 @@
+.checked {
+    background-color: #4CAF50;
+}
+
+.unchecked {
+  background-color: white;
+}
+
+.flasher {
+  width: auto;
+  text-decoration: underline;
+  color: white;
+
+  animation-name: flash;
+  animation-duration: 1s;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+.flasher a:hover {
+  text-decoration: underline;
+}
+
+.avBox {
+  border: solid 2px black;
+  width: 50em;
+  text-decoration: underline;
+  font-size: 1.5vmin;
+}
+
+.toggleDay {
+  width: 50em;
+  text-decoration: underline;
+  font-size: 1.5vmin;
+}
+
+.selectedtext {
+  padding: 2px;
+}
+
+.unselectedtext {
+  color: black;
+  padding: 2px;
+}
+
+@keyframes flash {
+  /* from {border-bottom: 1px solid white; border-top: 1px solid white; }
+  to {border-bottom: 1px solid black; border-top: 1px solid black;} */
+  from{text-decoration-color: white;}
+  to{text-decoration-color: transparent;}
+}

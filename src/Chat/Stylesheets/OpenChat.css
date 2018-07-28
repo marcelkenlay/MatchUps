@@ -1,0 +1,63 @@
+.ChatHeader {
+  z-index: 200;
+  height: 6vh;
+  max-height: 6vh;
+  overflow: hidden;
+}
+
+.ChatHeader h1 {
+  font-size: 5vh;
+  height: 100%;
+  padding-top: 0;
+  margin: 0.5vh;
+}
+
+.MessageBox {
+  width: 100%;
+  overflow-y: scroll;
+  padding-left: 8.5px;
+  padding-right: 8.5px; /* Increase/decrease this value for cross-browser compatibility */
+  box-sizing: content-box;
+  height: 77vh;
+  scroll-behavior: auto;
+  border: none;
+}
+
+.MessageBuilder {
+    width: 80%;
+    height: 100%;
+}
+
+#messageentrybox {
+    width: 85%;
+    height: 100%;
+    margin: 8px 0;
+    font-size: 1.5vh;
+    padding: 1.5vh;
+    margin: 0;
+    color: black;
+    border-bottom: 2px;
+    background-color: white;
+    border-radius: 15px;
+    border-style: solid;
+}
+
+.SendButton {
+    background-color: transparent;
+    color: white;
+    width: 15%;
+    height: 100%;
+    font-size: 1.5vh;
+    padding: 1.5vh 0;
+    margin: 0;
+    border-style: none;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.ChatPanel {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    display: block;
+}

@@ -1,0 +1,36 @@
+.right_panel {
+    grid-area: fx;
+    max-height: 100%;
+    height: 88vh;
+    overflow-y: auto;
+}
+
+.sidemenu {
+    grid-area: sm;
+    max-height: 100%;
+    height: 88vh;
+    overflow: auto;
+}
+
+.body {
+    grid-area: mn;
+    border-right: 5px solid #bfbfbf;
+    border-left: 5px solid #bfbfbf;
+    max-height: 88vh;
+    overflow-y: hidden;
+}
+
+.chat_wrapper {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    grid-template-areas: "sm sm mn mn mn mn fx fx fx"
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.chat_wrapper {
+    max-width: 1500px;
+    margin: 0 auto;
+}

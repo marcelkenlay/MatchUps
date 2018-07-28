@@ -1,0 +1,30 @@
+#teamscard {
+  padding: 10px;
+}
+
+.teamname {
+  padding-left: 10px;
+}
+
+.TeamCardsGrid {
+    border: 1px solid white;
+    margin: 0 0 1px 0;
+    text-decoration: none;
+    padding: 10px;
+}
+
+.map {
+    width: 100%;
+    background-color: black;
+    height: 50vh;
+    align-self: start;
+    text-align: center;
+}
+
+
+.teamcard {
+    background-color: white;
+}
+
+.AddPlayer {
+}

@@ -1,0 +1,10 @@
+.invitation {
+  width: 50%;
+  color: black;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#invitations-header {
+  color: white
+}

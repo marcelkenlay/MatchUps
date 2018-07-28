@@ -1,0 +1,56 @@
+
+
+.form_container{
+    width:    100%;
+    display:  inline;
+    float:    left;
+}
+
+.form_wrapper{
+    padding:  20px;
+}
+
+
+#players_container{
+    width:    48%;
+    display:  block;
+    float:    left;
+
+    z-index:  99999 ;
+    position: relative;
+}
+
+#sport_container{
+    width:    48%;
+    display:  block;
+    float:    right;
+
+    z-index:  99998 ;
+    position: relative;
+}
+
+
+#datetime{
+    width:    48%;
+    float:    left;
+    display:  inline;
+    z-index:  50000;
+    position: relative;
+}
+
+.react-datetime-picker{
+    color:    #000000;
+    background-color: #FFFFFF;
+}
+
+#duration{
+    width:    48%;
+    float:    right;
+    display:  inline;
+    position: relative;
+}
+
+.submitbutton {
+  margin-top: 10px;
+  color: black;
+}

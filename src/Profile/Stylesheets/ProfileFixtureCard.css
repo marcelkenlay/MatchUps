@@ -1,0 +1,62 @@
+/* Match result colours */
+.win {
+  border: 2px solid green;
+    /* background-color: #c1ffd1; */
+}
+
+.lose {
+  border: 2px solid red;
+    /* background-color: #ffbaba; */
+}
+
+.draw {
+  border: 2px solid yellow;
+    /* background-color: #fffac1; */
+}
+
+.unplayed {
+  border: 2px solid white;
+  border: 2px solid white;
+  /* background-color: #c4c4c4; */
+}
+
+
+.teamname {
+    font-size: 2.5vmin;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+
+.resultcard {
+    min-height: 100%;
+    width: 100%;
+    padding-top: 5px;
+    margin-right: 15px;
+    display: inline-block;
+}
+
+.resultcard h2 {
+    font-size: 4vmin;
+}
+
+.subtext {
+  font-size:1.5vmin;
+}
+
+.teamvs table {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  table-layout: fixed;
+}
+
+.teamvs td {
+  width: 33%;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.notopmargin {
+  margin-top: 0;
+}

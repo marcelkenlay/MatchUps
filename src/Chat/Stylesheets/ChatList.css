@@ -1,0 +1,11 @@
+#chatlist hr {
+  z-index: 200;
+  height: 3.7vw;
+}
+
+#chatlist h1 {
+  font-size: 3.1vw;
+  height: 100%;
+  padding-top: 0;
+  margin: 0.3vw;
+}

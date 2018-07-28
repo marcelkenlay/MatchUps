@@ -1,0 +1,47 @@
+#menupanel {
+  background-color: black;
+  color: white;
+  align-content: center;
+  height: 100%;
+
+  overflow: hidden;
+  border-bottom: solid 2px white;
+}
+
+#menupanel h1 {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  text-align: center;
+  margin: auto;
+  font-size: 5vmin;
+}
+
+
+
+#menuwrapper {
+  margin: auto;
+  text-align: center;
+}
+
+#menuwrapper table {
+  width: 100%;
+  font-weight: bold;
+  margin-left: auto;
+  margin-right: auto;
+  table-layout: fixed;
+  margin-bottom: 10px;
+}
+
+#menuwrapper a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding-left: 15%;
+  padding-right: 15%;
+  font-size: 1.75vmin;
+  text-decoration: none;
+}
+
+#menuwrapper .clickable:hover {
+  background-color: #111111;
+}

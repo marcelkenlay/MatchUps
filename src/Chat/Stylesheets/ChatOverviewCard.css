@@ -1,0 +1,58 @@
+.chat_abbreviation {
+    grid-area: ab;
+    font-size: 0.5vw;
+    padding:0.3vw;
+    padding-top: 0.5vw;
+    text-align: center;
+}
+
+.chat_abbreviation_bold {
+    font-size: 1.5vw;
+}
+
+.chat_name {
+    padding-bottom: 0;
+    margin-bottom: 0;
+    border-bottom: 1px solid white;
+    font-size: 1vw;
+    grid-area: cn;
+}
+
+.chat_members {
+    font-size: 0.8vw;
+    grid-area: cm;
+}
+
+.ChatCard {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    grid-auto-rows: minmax(25px, auto);
+    grid-template-areas: "ab ab cn cn cn cn cn cn cn "
+                         "ab ab cm cm cm cm cm cm cm "
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.ChatCard {
+    border: 1px solid #ccc;
+    margin: 0 0 10px 0;
+    text-decoration: none;
+}
+
+.circleimg {
+    height: auto;
+    margin: auto;
+    clip-path: circle(80px at center);
+    display: block;
+}
+
+.activeChatCardHolder {
+   background: #ebebfa;
+   color: black;
+}
+
+.activeChatCardHolder, .chatCardHolder {
+  cursor: pointer;
+}

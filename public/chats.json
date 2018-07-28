@@ -1,0 +1,4 @@
+[
+    {"FixtureID":1, "UserTeamID":3,"OppID":4, "UserTeamName":"Marcel FC", "OppName":"The Opps"},
+    {"FixtureID":-1, "UserTeamID":3,"OppID":4, "UserTeamName":"Marcel FC", "OppName":"The Opps"}
+  ]

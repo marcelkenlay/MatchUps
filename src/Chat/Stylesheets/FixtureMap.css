@@ -1,0 +1,15 @@
+.fixture-popover, .selected-popover {
+  color: black;
+  background-color: white;
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+}
+
+.fixture-popover {
+  border: 0;
+}
+
+.selected-popover {
+  border-bottom: 3px solid red
+}

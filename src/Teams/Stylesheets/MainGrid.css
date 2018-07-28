@@ -1,0 +1,76 @@
+#teamwrapper {
+  width: 80%;
+  height: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#teamtable {
+  width: 100%;
+}
+
+#teamleft {
+  width: 70%;
+}
+
+#teamright {
+  width: 30%;
+  vertical-align: middle;
+}
+
+#teaminfo {
+  width: 70%;
+  left: 0%;
+  margin: 0;
+  display: inline;
+  background-color: red;
+}
+
+#teamopts {
+  position: relative;
+  width: 30%;
+  display: inline;
+  background-color: blue;
+}
+
+.TeamGrid {
+    border: 1px solid #ccc;
+    margin: 0 0 1px 0;
+    text-decoration: none;
+    color: black;
+}
+
+.teaminfo {
+    background-color: white;
+    grid-area: ti;
+    height: 78vh;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+}
+
+.circle {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    font-size: 50px;
+    color: #fff;
+    line-height: 500px;
+    text-align: center;
+    background: red;
+}
+
+.popover-text {
+  color: black;
+}
+
+#createTeam a {
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 5vmin;
+}
+
+#createTeam {
+  vertical-align: middle;
+}

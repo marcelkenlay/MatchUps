@@ -1,0 +1,86 @@
+/* Elements */
+#username {
+    max-width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 5vmin;
+
+}
+
+#locChangeLink {
+    font-size: 1.5vmin;
+    text-decoration: underline;
+}
+
+#fixturesbox {
+    width: 80%;
+    height: 15vmin;
+    margin-left: auto;
+    margin-right: auto;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+    padding-bottom: 15px;
+}
+
+td {
+  vertical-align: top;
+}
+.AvTable {
+    width: 100%;
+    text-align: center;
+}
+
+.AvTable table {
+  width: 80%;
+    margin: 0 auto; /* or margin: 0 auto 0 auto */
+}
+
+#fixturesbox table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+#changelocbox {
+  width: 60%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.subheading {
+  margin-bottom: 0;
+}
+
+.notopmargin {
+  margin-top: 5px;
+}
+
+
+
+
+
+#carousel {
+  max-width: 100%;
+  overflow: auto;
+  white-space: nowrap;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#carousel-table {
+  white-space: nowrap;
+  display: block;
+}
+
+.cell-wrap {
+  position: relative;
+  width: inherit;
+  height: inherit;
+  padding: 5px;
+}
+
+.carousel-cell {
+  vertical-align: middle;
+  height: 100%;
+}

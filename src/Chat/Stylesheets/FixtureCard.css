@@ -1,0 +1,113 @@
+.game-brief {
+  text-align: left;
+}
+
+.date {
+  text-align: left;
+}
+
+.venue {
+  text-align: left;
+}
+
+.btn {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.card, .selected-card {
+  margin: 0 0 10px 0;
+  text-decoration: none;
+  color: white;
+}
+
+.card {
+  border: 1px solid #ccc;
+}
+
+.selected-card {
+  border: 1px solid red;
+}
+
+.left-col {
+  width: 60%;
+  text-align: left;
+}
+
+.right-col {
+  max-width: 40%;
+  text-align: right;
+}
+
+.game-brief {
+  font-size: 1.4vw;
+}
+
+.team-name {
+  font-size: 1.4vw;
+  display: inline;
+  font-weight: bold;
+}
+
+.voting-header {
+  text-align: center;
+  padding-top: 0.2vh;
+  font-size: 1.1vw;
+  width: 100%;
+}
+
+.vote-up {
+  border-bottom: 3px solid  #cccccc;
+  font-size: 1.4vw
+}
+
+.vote-up-selected {
+  border-bottom: 3px solid #009900;
+  font-size: 1.4vw;
+  font-weight: bold;
+}
+
+.vote-down {
+  border-bottom: 3px solid #cccccc;
+  font-size: 1.4vw;
+}
+
+.vote-down:hover, .vote-down-selected:hover, .vote-up:hover, .vote-up-selected:hover {
+  background-color: #333;
+  opacity: 0.5;
+}
+
+.vote-down-selected {
+  border-bottom: 3px solid #ff0000;
+  font-size: 1.4vw;
+  font-weight: bold
+}
+
+.vote-up, .vote-down, .vote-up-selected, .vote-down-selected {
+  margin-left: 1vw;
+  cursor: pointer;
+}
+
+.preftext {
+  font-weight: bold;
+  font-size: 1.7vmin;
+}
+
+.votetable {
+  width: 90%;
+  table-layout: fixed;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.separatorcell {
+  width: 5%;
+}
+
+.votecell {
+  margin: 0;
+  width: 30%;
+  text-align: center;
+  border-collapse:separate;
+  border-spacing: 2.5%;
+}

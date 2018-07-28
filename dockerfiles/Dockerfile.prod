@@ -1,0 +1,8 @@
+FROM alpine
+
+WORKDIR /main-app
+COPY /build ./build
+COPY main .
+
+ENTRYPOINT /main-app/main
+EXPOSE 8080
