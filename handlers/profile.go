@@ -1,55 +1,57 @@
 package handlers
 
 import (
+	. "./db"
+	. "./request_utils"
+	. "./users"
 	"net/http"
 
-  _ "github.com/lib/pq"
+	. "./utils"
 	"encoding/json"
 	"fmt"
+	_ "github.com/lib/pq"
 	"net/url"
-	"strings"
 	"strconv"
-	. "../utils"
+	"strings"
 )
 
-type UserInfo struct {
-	LocLat  float64
-	LocLng  float64
+type UserLocationInfo struct {
+	Location string `json:"location"`
 }
 
 type Availability struct {
-	Mon  int64
-	Tues int64
-	Wed  int64
+	Mon   int64
+	Tues  int64
+	Wed   int64
 	Thurs int64
-	Fri  int64
-	Sat  int64
-	Sun  int64
+	Fri   int64
+	Sat   int64
+	Sun   int64
 }
 
 type Fixture struct {
-	Opposition    string
-	ForTeam       string
-	Sport         string
-	LocLat        string
-	LocLng        string
-	Date          string
-	ScoreHome     int
-	ScoreAway     int
-	IsHome        bool
+	Opposition string
+	ForTeam    string
+	Sport      string
+	LocLat     string
+	LocLng     string
+	Date       string
+	ScoreHome  int
+	ScoreAway  int
+	IsHome     bool
 }
 
 // Query the database for a userID corresponding to a username
 func GetUserIDFromUsername(username string) (userID int) {
 	// Obtain userID
 	query := fmt.Sprintf("SELECT user_id FROM users WHERE username='%s'", username)
-  row, err := Database.Query(query)
-  CheckErr(err)
+	row, err := Database.Query(query)
+	CheckErr(err)
 
-  if (row.Next()) {
-    row.Scan(&userID)
-  } else {
-		// Username error
+	if (row.Next()) {
+		_ = row.Scan(&userID)
+	} else {
+		// username error
 		userID = -1; // Failure value TODO: make front end handle this
 		fmt.Println("Unrecognised username (GetUserUpcoming), ", username)
 	}
@@ -57,44 +59,29 @@ func GetUserIDFromUsername(username string) (userID int) {
 	return userID
 }
 
-// Get the user information for the user specified in the url
-var GetUserInfo = http.HandlerFunc(func (writer http.ResponseWriter, request *http.Request) {
-	// Obtain username (query is of the form ?username)
-	getquery, err := url.QueryUnescape(request.URL.RawQuery)
-	username := (strings.Split(getquery, "=")[1])
+var GetUserLocation = http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+	println(request)
 
-	// Run query
-  query := fmt.Sprintf("SELECT loc_lat, loc_lng FROM users WHERE username='%s';", username)
-  rows, _ := Database.Query(query)
-  CheckErr(err)
+	userSessionCookie := BuildUserSessionFromRequest(request)
 
-	// Add the only database hit to the result
-	if (rows.Next()) {
-		data := UserInfo{}
-		err = rows.Scan(&data.LocLat, &data.LocLng)
+	locationInfo := UserLocationInfo{Location: GetUserLocationInfo(userSessionCookie)}
 
-		j,_ := json.Marshal(data) // Convert the list of DB hits to a JSON
-		// fmt.Println(string(j))
-		fmt.Fprintln(writer, string(j)) // Write the result to the sender
-	} else {
-		fmt.Println("No user info DB hit for ", username)
-	}
+	EncodeJSONResponse(writer, locationInfo)
 })
 
-
 // Get the fixtures for the user specified in the url
-var GetUserUpcoming = http.HandlerFunc(func (writer http.ResponseWriter, request *http.Request) {
+var GetUserUpcoming = http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 	// Obtain username (query is of the form ?username=name)
 	getquery, err := url.QueryUnescape(request.URL.RawQuery)
 	username := strings.Split(getquery, "=")[1]
 
 	// Obtain userID
-  userID := GetUserIDFromUsername(username)
+	userID := GetUserIDFromUsername(username)
 
-  // Build queries
+	// Build queries
 	ordering := "ORDER BY date ASC"
-	commonQueryFields :=  "sport, loc_lat, loc_lng, date"
-  tables := "upcoming_fixtures JOIN team_members"
+	commonQueryFields := "sport, loc_lat, loc_lng, date"
+	tables := "upcoming_fixtures JOIN team_members"
 
 	homeFields := fmt.Sprintf("away_id, home_id, %s", commonQueryFields)
 	homeTableJoinCond := "home_id=team_id"
@@ -106,11 +93,11 @@ var GetUserUpcoming = http.HandlerFunc(func (writer http.ResponseWriter, request
 	var jsonText = []byte(`[]`)
 
 	homeQuery := fmt.Sprintf("SELECT %s FROM %s ON %s WHERE user_id=%d %s",
-		                        homeFields, tables, homeTableJoinCond, userID, ordering)
+		homeFields, tables, homeTableJoinCond, userID, ordering)
 	awayQuery := fmt.Sprintf("SELECT %s FROM %s ON %s WHERE user_id=%d %s",
-		                        awayFields, tables, awayTableJoinCond, userID, ordering)
+		awayFields, tables, awayTableJoinCond, userID, ordering)
 
-  // Run the query for home games
+	// Run the query for home games
 	rows, err := Database.Query(homeQuery)
 	CheckErr(err)
 
@@ -172,16 +159,15 @@ var GetUserUpcoming = http.HandlerFunc(func (writer http.ResponseWriter, request
 	err = json.Unmarshal([]byte(jsonText), &teamFixtures)
 	merge(&teamHome, &teamAway, &teamFixtures)
 
-	j,_ := json.Marshal(teamFixtures)        // Convert the list of DB hits to a JSON
+	j, _ := json.Marshal(teamFixtures) // Convert the list of DB hits to a JSON
 	// fmt.Println("Upcoming>>>")           // Write the result to the console
 	// fmt.Println(string(j))           // Write the result to the console
 	// fmt.Println("<<<Upcoming")           // Write the result to the console
 	fmt.Fprintln(writer, string(j)) // Write the result to the sender
 })
 
-
 // Get the fixtures for the user specified in the url
-var GetUserFixtures = http.HandlerFunc(func (writer http.ResponseWriter, request *http.Request) {
+var GetUserFixtures = http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 	// Obtain username (query is of the form ?username=name)
 	getquery, err := url.QueryUnescape(request.URL.RawQuery)
 	username := strings.Split(getquery, "=")[1]
@@ -204,9 +190,9 @@ var GetUserFixtures = http.HandlerFunc(func (writer http.ResponseWriter, request
 	var jsonText = []byte(`[]`)
 
 	homeQuery := fmt.Sprintf("SELECT %s FROM %s ON %s WHERE user_id=%d %s",
-														homeFields, tables, homeTableJoinCond, userID, ordering)
+		homeFields, tables, homeTableJoinCond, userID, ordering)
 	awayQuery := fmt.Sprintf("SELECT %s FROM %s ON %s WHERE user_id=%d %s",
-														awayFields, tables, awayTableJoinCond, userID, ordering)
+		awayFields, tables, awayTableJoinCond, userID, ordering)
 
 	// Run the query for home games
 	rows, err := Database.Query(homeQuery)
@@ -274,13 +260,12 @@ var GetUserFixtures = http.HandlerFunc(func (writer http.ResponseWriter, request
 	err = json.Unmarshal([]byte(jsonText), &teamFixtures)
 	merge(&teamHome, &teamAway, &teamFixtures)
 
-	j,_ := json.Marshal(teamFixtures)        // Convert the list of DB hits to a JSON
+	j, _ := json.Marshal(teamFixtures) // Convert the list of DB hits to a JSON
 	// fmt.Println("Prev>>>")           // Write the result to the console
 	// fmt.Println(string(j))           // Write the result to the console
 	// fmt.Println("<<<Prev")           // Write the result to the console
 	fmt.Fprintln(writer, string(j)) // Write the result to the sender})
 })
-
 
 // Merge two lists of fixtures
 func merge(list1 *[]Fixture, list2 *[]Fixture, result *[]Fixture) {
@@ -305,9 +290,8 @@ func merge(list1 *[]Fixture, list2 *[]Fixture, result *[]Fixture) {
 	}
 }
 
-
 // Get the availability for the user specified in the url
-var GetUserAvailability = http.HandlerFunc(func (writer http.ResponseWriter, request *http.Request) {
+var GetUserAvailability = http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 	// Obtain username (query is of the form ?username=name)
 	getquery, err := url.QueryUnescape(request.URL.RawQuery)
 	username := (strings.Split(getquery, "=")[1])
@@ -315,10 +299,10 @@ var GetUserAvailability = http.HandlerFunc(func (writer http.ResponseWriter, req
 	// Obtain userID
 	userID := GetUserIDFromUsername(username)
 
-  // Run query
-	daysFields := "mon, tues, weds, thurs, fri, sat, sun"
-	query := fmt.Sprintf("SELECT %s FROM user_avail WHERE user_id=%d;",
-		                    daysFields, userID)
+	// Run query
+	daysFields := "mon, tue, wed, thu, fri, sat, sun"
+	query := fmt.Sprintf("SELECT %s FROM user_availability WHERE user_id=%d;",
+		daysFields, userID)
 	rows, err := Database.Query(query)
 	CheckErr(err)
 
@@ -341,14 +325,13 @@ var GetUserAvailability = http.HandlerFunc(func (writer http.ResponseWriter, req
 		fmt.Println("Error no avail DB hit for ", username)
 	}
 
-	j,_ := json.Marshal(result) // Convert the list of DB hits to a JSON
+	j, _ := json.Marshal(result) // Convert the list of DB hits to a JSON
 	// fmt.Println(string(j))
 	fmt.Fprintln(writer, string(j)) // Write the result to the sender
 })
 
-
 // Update the user availability for the user and values specified in the url
-var UpdateUserAvailability = http.HandlerFunc(func (writer http.ResponseWriter, request *http.Request) {
+var UpdateUserAvailability = http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 	// Obtain the bitmaps (query is of the form ?username=name&fst=x&snd=y)
 	getquery, err := url.QueryUnescape(request.URL.RawQuery)
 	username := strings.Split((strings.Split(getquery, "=")[1]), "&")[0]
@@ -378,10 +361,10 @@ var UpdateUserAvailability = http.HandlerFunc(func (writer http.ResponseWriter, 
 	userID := GetUserIDFromUsername(username)
 
 	// Run query
-	fields := fmt.Sprintf("mon=%d, tues=%d, weds=%d, thurs=%d, fri=%d, sat=%d, sun=%d",
-												 monBitmap, tuesBitmap, wedsBitmap, thursBitmap, friBitmap, satBitmap, sunBitmap)
-	query := fmt.Sprintf("UPDATE user_avail SET %s WHERE user_id=%d",
-												fields, userID)
+	fields := fmt.Sprintf("mon=%d, tue=%d, wed=%d, thu=%d, fri=%d, sat=%d, sun=%d",
+		monBitmap, tuesBitmap, wedsBitmap, thursBitmap, friBitmap, satBitmap, sunBitmap)
+	query := fmt.Sprintf("UPDATE user_availability SET %s WHERE user_id=%d",
+		fields, userID)
 
 	_, err = Database.Query(query)
 	CheckErr(err)
@@ -394,7 +377,6 @@ var UpdateUserAvailability = http.HandlerFunc(func (writer http.ResponseWriter, 
 
 	recalculateUsersTeamAvailabilities(userID)
 })
-
 
 func recalculateUsersTeamAvailabilities(userID int) {
 	query := fmt.Sprintf("SELECT team_id FROM team_members WHERE user_id=%d;", userID)
@@ -409,30 +391,29 @@ func recalculateUsersTeamAvailabilities(userID int) {
 	}
 }
 
-
 func RecalculateTeamAvailability(team_id int) {
-	fields := "mon, tues, weds, thurs, fri, sat, sun"
-		query := fmt.Sprintf("SELECT %s FROM user_avail NATURAL INNER JOIN team_members WHERE team_id=%d;", fields, team_id)
+	fields := "mon, tue, wed, thur, fri, sat, sun"
+	query := fmt.Sprintf("SELECT %s FROM user_availability NATURAL INNER JOIN team_members WHERE team_id=%d;", fields, team_id)
 
 	rows, err := Database.Query(query)
 	CheckErr(err)
 
-	var totalMon   int64 = 0xFFFFFFFF
-	var totalTues  int64 = 0xFFFFFFFF
-	var totalWeds  int64 = 0xFFFFFFFF
+	var totalMon int64 = 0xFFFFFFFF
+	var totalTues int64 = 0xFFFFFFFF
+	var totalWeds int64 = 0xFFFFFFFF
 	var totalThurs int64 = 0xFFFFFFFF
-	var totalFri   int64 = 0xFFFFFFFF
-	var totalSat   int64 = 0xFFFFFFFF
-	var totalSun   int64 = 0xFFFFFFFF
+	var totalFri int64 = 0xFFFFFFFF
+	var totalSat int64 = 0xFFFFFFFF
+	var totalSun int64 = 0xFFFFFFFF
 
 	for (rows.Next()) {
-		var holderMon   int64
-		var holderTues  int64
-		var holderWeds  int64
+		var holderMon int64
+		var holderTues int64
+		var holderWeds int64
 		var holderThurs int64
-		var holderFri   int64
-		var holderSat   int64
-		var holderSun   int64
+		var holderFri int64
+		var holderSat int64
+		var holderSun int64
 
 		rows.Scan(
 			&holderMon,
@@ -443,40 +424,39 @@ func RecalculateTeamAvailability(team_id int) {
 			&holderSat,
 			&holderSun)
 
-		totalMon   = totalMon   & holderMon
-		totalTues  = totalTues  & holderTues
-		totalWeds  = totalWeds  & holderWeds
+		totalMon = totalMon & holderMon
+		totalTues = totalTues & holderTues
+		totalWeds = totalWeds & holderWeds
 		totalThurs = totalThurs & holderThurs
-		totalFri   = totalFri   & holderFri
-		totalSat   = totalSat   & holderSat
-		totalSun   = totalSun   & holderSun
+		totalFri = totalFri & holderFri
+		totalSat = totalSat & holderSat
+		totalSun = totalSun & holderSun
 	}
 
-	fields = fmt.Sprintf("mon=%d, tues=%d, weds=%d, thurs=%d, fri=%d, sat=%d, sun=%d",
-		                     totalMon, totalTues, totalWeds, totalThurs, totalFri, totalSat, totalSun)
+	fields = fmt.Sprintf("mon=%d, tue=%d, wed=%d, thu=%d, fri=%d, sat=%d, sun=%d",
+		totalMon, totalTues, totalWeds, totalThurs, totalFri, totalSat, totalSun)
 	query = fmt.Sprintf("UPDATE team_avail SET %s WHERE team_id=%d",
-											  fields, team_id)
+		fields, team_id)
 
 	_, err = Database.Query(query)
 	CheckErr(err)
 }
 
-
 // Update the user location for the user and values specified in the url
-var UpdateUserLocation = http.HandlerFunc(func (writer http.ResponseWriter, request *http.Request) {
+var UpdateUserLocation = http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 	// Obtain the new location (query is of the form ?username=name&lat=x&lng=y)
 	getquery, err := url.QueryUnescape(request.URL.RawQuery)
 	query := strings.Split(getquery, "&")
 
 	fields := make([]string, len(query))
-	for index, element:= range query{
+	for index, element := range query {
 		fields[index] = strings.Split(element, "=")[1]
 	}
 
 	username := fields[0]
-	lat,err := strconv.ParseFloat(fields[1], 64)
+	lat, err := strconv.ParseFloat(fields[1], 64)
 	CheckErr(err)
-	lng,err := strconv.ParseFloat(fields[2], 64)
+	lng, err := strconv.ParseFloat(fields[2], 64)
 	CheckErr(err)
 
 	var userID int = GetUserIDFromUsername(username)
@@ -484,7 +464,7 @@ var UpdateUserLocation = http.HandlerFunc(func (writer http.ResponseWriter, requ
 	// Run query
 	dbfields := fmt.Sprintf("loc_lat=%f, loc_lng=%f", lat, lng)
 	dbquery := fmt.Sprintf("UPDATE users SET %s WHERE user_id=%d",
-											  dbfields, userID)
+		dbfields, userID)
 
 	_, err = Database.Query(dbquery)
 	CheckErr(err)
@@ -498,7 +478,6 @@ var UpdateUserLocation = http.HandlerFunc(func (writer http.ResponseWriter, requ
 	recalculateUsersTeamLocations(userID);
 })
 
-
 func recalculateUsersTeamLocations(userID int) {
 	query := fmt.Sprintf("SELECT team_id FROM team_members WHERE user_id=%d;", userID)
 
@@ -511,7 +490,6 @@ func recalculateUsersTeamLocations(userID int) {
 		RecalculateTeamLocation(team_id)
 	}
 }
-
 
 func RecalculateTeamLocation(team_id int) {
 	query := fmt.Sprintf("SELECT loc_lat, loc_lng FROM users NATURAL INNER JOIN team_members WHERE team_id=%d;", team_id)
@@ -534,7 +512,7 @@ func RecalculateTeamLocation(team_id int) {
 	}
 
 	query = fmt.Sprintf("UPDATE team_locations SET loc_lat=%f, loc_lng=%f WHERE team_id=%d;",
-	                    (totalLat / cnt), (totalLong / cnt), team_id)
+		(totalLat / cnt), (totalLong / cnt), team_id)
 
 	_, err = Database.Query(query)
 	CheckErr(err)

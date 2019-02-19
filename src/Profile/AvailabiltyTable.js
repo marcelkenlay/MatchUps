@@ -195,9 +195,9 @@ export default class AvailabiltyTable extends React.Component {
     // Send the bitmap values to the server
     axios.get("/updateuseravail?username=" + username +
               "&mon="  + bitmaps[0] +
-              "&tues=" + bitmaps[1] +
-              "&weds=" + bitmaps[2] +
-              "&thurs=" + bitmaps[3] +
+              "&tue=" + bitmaps[1] +
+              "&wed=" + bitmaps[2] +
+              "&thu=" + bitmaps[3] +
               "&fri="  + bitmaps[4] +
               "&sat="  + bitmaps[5] +
               "&sun="  + bitmaps[6])

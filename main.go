@@ -1,11 +1,12 @@
 package main
 
 import (
-	"net/http"
-  "log"
-  _ "github.com/lib/pq"
-	"github.com/gorilla/mux"
+	. "./handlers/db"
 	. "./handlers"
+	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
+	"log"
+	"net/http"
 )
 
 func main() {
@@ -17,8 +18,8 @@ func main() {
 	r := mux.NewRouter()
 
 	// Profile page
-	r.Handle("/getuserinfo", GetUserInfo).Methods("GET")
-	r.Handle("/getuserfixtures", GetUserFixtures).Methods("GET")
+	r.Handle("/getuserlocation/{sessionId}/{sessionHash}", GetUserLocation).Methods("GET")
+	r.Handle("/getuserfixtures/{userSession}", GetUserFixtures).Methods("GET")
 	r.Handle("/getuseravail", GetUserAvailability).Methods("GET")
 	r.Handle("/updateuseravail", UpdateUserAvailability).Methods("GET")
 	r.Handle("/getuserupcoming", GetUserUpcoming).Methods("GET")

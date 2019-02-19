@@ -1,19 +1,20 @@
 package handlers
 
 import (
-	"net/http"
+	. "./utils"
+	. "./db"
 	"encoding/json"
 	"fmt"
-	"net/url"
-	"strings"
-	. "../utils"
-	_ "github.com/lib/pq"
-	"strconv"
 	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
+	"net/http"
+	"net/url"
+	"strconv"
+	"strings"
 )
 
 type Team struct {
-	ID			int 		 `json:"id"`
+	ID      int      `json:"id"`
 	NAME    string   `json:"name"`
 	IMAGE   string   `json:"image"`
 	PLAYERS []Player `json:"players"`
@@ -81,7 +82,6 @@ var GetInvitations = http.HandlerFunc(func(w http.ResponseWriter, r *http.Reques
 	rows, err := Database.Query(query)
 	CheckErr(err)
 
-
 	for rows.Next() {
 		team := Team{}
 		err := rows.Scan(&team.NAME)
@@ -111,9 +111,9 @@ var GetInvitations = http.HandlerFunc(func(w http.ResponseWriter, r *http.Reques
 })
 
 type QueryMatch struct {
-	UserID		int
-	Username	string
-	FullName	string
+	UserID   int
+	Username string
+	FullName string
 }
 
 var GetUsernameMatches = http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
@@ -134,13 +134,13 @@ var GetUsernameMatches = http.HandlerFunc(func(writer http.ResponseWriter, reque
 		result = append(result, data)
 	}
 
-	j, _ := json.Marshal(result) // Convert the list of DB hits to a JSON
+	j, _ := json.Marshal(result)    // Convert the list of DB hits to a JSON
 	fmt.Fprintln(writer, string(j)) // Write the result to the sender
 })
 
 type TeamInfo struct {
 	TeamName  string
-	CaptainID	int
+	CaptainID int
 }
 
 //todo set up MUX router to take url of user and team to add to database.
@@ -155,9 +155,9 @@ var AddTeam = http.HandlerFunc(func(writer http.ResponseWriter, request *http.Re
 
 	// Check that team name is unique
 	query := fmt.Sprintf("SELECT COUNT(*) FROM team_names WHERE UPPER(team_name)='%s';",
-									strings.ToUpper(teamInfo.TeamName))
-  rows, err := Database.Query(query)
-  CheckErr(err)
+		strings.ToUpper(teamInfo.TeamName))
+	rows, err := Database.Query(query)
+	CheckErr(err)
 
 	// Parse count
 	rows.Next()
@@ -170,15 +170,15 @@ var AddTeam = http.HandlerFunc(func(writer http.ResponseWriter, request *http.Re
 		return
 	}
 
-	// Add Team Name Record
+	// Add Team name Record
 	query = fmt.Sprintf("INSERT INTO team_names (team_name) VALUES('%s');",
-							teamInfo.TeamName);
+		teamInfo.TeamName);
 	rows, err = Database.Query(query)
 	CheckErr(err)
 
 	// Get ID for Team
 	query = fmt.Sprintf("SELECT team_id FROM team_names WHERE team_name='%s';",
-									teamInfo.TeamName)
+		teamInfo.TeamName)
 	rows, err = Database.Query(query)
 	rows.Next()
 	var team_id int
@@ -191,8 +191,8 @@ var AddTeam = http.HandlerFunc(func(writer http.ResponseWriter, request *http.Re
 	CheckErr(err)
 
 	// Add Team Captain
-  query = fmt.Sprintf("INSERT INTO team_captains (user_id, team_id) VALUES(%d, %d);",
-							teamInfo.CaptainID, team_id)
+	query = fmt.Sprintf("INSERT INTO team_captains (user_id, team_id) VALUES(%d, %d);",
+		teamInfo.CaptainID, team_id)
 	_, err = Database.Query(query)
 	CheckErr(err)
 
@@ -207,10 +207,18 @@ var AddTeam = http.HandlerFunc(func(writer http.ResponseWriter, request *http.Re
 	RecalculateTeamAvailability(team_id)
 
 	// Add captain as team member
-  query = fmt.Sprintf("INSERT INTO team_members (user_id, team_id) VALUES(%d, %d);",
-							teamInfo.CaptainID, team_id)
+	query = fmt.Sprintf("INSERT INTO team_members (user_id, team_id) VALUES(%d, %d);",
+		teamInfo.CaptainID, team_id)
 	_, err = Database.Query(query)
 	CheckErr(err)
+
+	//TODO: USE THIS FORMAT
+	// CREATE  TABLE IF NOT EXISTS `chats`.`chat_user` (
+	//	`id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
+	//	`handle` VARCHAR(45) NOT NULL ,
+	//	PRIMARY KEY (`id`) )
+	//ENGINE = InnoDB;
+
 
 	//Create message table for team
 	table_name := fmt.Sprintf("_team%d_messages", team_id)
@@ -219,13 +227,12 @@ var AddTeam = http.HandlerFunc(func(writer http.ResponseWriter, request *http.Re
 	_, err = Database.Query(query)
 	CheckErr(err)
 
-
 	fmt.Fprintln(writer, team_id) // Write whethersuccessful to the sender
 })
 
 type TeamInvInfo struct {
-	TeamID  	int
-	Invitees	[]int
+	TeamID   int
+	Invitees []int
 }
 
 var SendInvitations = http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
@@ -239,8 +246,8 @@ var SendInvitations = http.HandlerFunc(func(writer http.ResponseWriter, request 
 
 	//Add invitations
 	for _, invitee := range teamInvInfo.Invitees {
-	  query := fmt.Sprintf("INSERT INTO team_invitations VALUES(%d, %d);",
-								teamInvInfo.TeamID, invitee)
+		query := fmt.Sprintf("INSERT INTO team_invitations VALUES(%d, %d);",
+			teamInvInfo.TeamID, invitee)
 		// fmt.Println(query)
 		_, err = Database.Query(query)
 		CheckErr(err)
@@ -253,26 +260,26 @@ var AddPlayerToTeam = http.HandlerFunc(func(writer http.ResponseWriter, request 
 
 	//get user-id and team-id
 	var userId, teamId int
-	query := fmt.Sprintf("select user_id " +
-		"FROM users where username='%s'",vars["username"])
+	query := fmt.Sprintf("select user_id "+
+		"FROM users where username='%s'", vars["username"])
 	err := Database.QueryRow(query).Scan(&userId)
 	CheckErr(err)
-	query = fmt.Sprintf("select team_id " +
-		"FROM team_names where team_name='%s'",vars["teamname"])
+	query = fmt.Sprintf("select team_id "+
+		"FROM team_names where team_name='%s'", vars["teamname"])
 	err = Database.QueryRow(query).Scan(&teamId)
 	CheckErr(err)
 	//insert into team_members
 	query = fmt.Sprintf("INSERT INTO team_members VALUES('%d', '%d');",
 		teamId, userId)
-	_,err = Database.Query(query)
+	_, err = Database.Query(query)
 	CheckErr(err)
 
 	//remove team from team_invitations
 	query = fmt.Sprintf(
-		"DELETE FROM team_invitations " +
-		"WHERE team_id=%d AND player_id=%d",
+		"DELETE FROM team_invitations "+
+			"WHERE team_id=%d AND player_id=%d",
 		teamId, userId)
-	_,err = Database.Query(query)
+	_, err = Database.Query(query)
 	CheckErr(err)
 
 	//send updated team
@@ -302,7 +309,6 @@ var AddPlayerToTeam = http.HandlerFunc(func(writer http.ResponseWriter, request 
 	RecalculateTeamLocation(teamId)
 })
 
-
 var DeleteInvitation = http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 	vars := mux.Vars(request)
 
@@ -319,25 +325,25 @@ var DeleteInvitation = http.HandlerFunc(func(writer http.ResponseWriter, request
 
 	//remove team from team_invitations
 	query = fmt.Sprintf(
-		"DELETE FROM team_invitations " +
+		"DELETE FROM team_invitations "+
 			"WHERE team_id=%d AND player_id=%d",
 		teamId, userId)
-	_,err = Database.Query(query)
+	_, err = Database.Query(query)
 	CheckErr(err)
 	writer.WriteHeader(http.StatusOK)
 })
 
-var GetTeamNames = http.HandlerFunc(func (writer http.ResponseWriter, request *http.Request) {
+var GetTeamNames = http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 	// Obtain username (query is of the form ?username)
 	getquery, err := url.QueryUnescape(request.URL.RawQuery)
 	team_id := strings.Split(getquery, "=")[1]
 
 	// Run query
-  query := fmt.Sprintf("SELECT users.name FROM team_members " +
-												"NATURAL INNER JOIN users " +
-												" WHERE team_members.team_id=%s;", team_id)
-  rows, err := Database.Query(query)
-  CheckErr(err)
+	query := fmt.Sprintf("SELECT users.name FROM team_members "+
+		"NATURAL INNER JOIN users "+
+		" WHERE team_members.team_id=%s;", team_id)
+	rows, err := Database.Query(query)
+	CheckErr(err)
 
 	var result []string
 	// Add every database hit to the result
@@ -347,6 +353,6 @@ var GetTeamNames = http.HandlerFunc(func (writer http.ResponseWriter, request *h
 		result = append(result, member)
 	}
 
-	j,_ := json.Marshal(result) // Convert the list of DB hits to a JSON
+	j, _ := json.Marshal(result)    // Convert the list of DB hits to a JSON
 	fmt.Fprintln(writer, string(j)) // Write the result to the sender
 })
