@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	_ "github.com/lib/pq"
+	"strings"
 )
 
 type Condition struct {
@@ -25,6 +26,20 @@ func TableColumn(table Table, col string) string {
 		return fmt.Sprintf("%s.%s", table.alias, col)
 	}
 
+}
+
+func ColInSetCondition(col string, args []interface{}) Condition {
+	i := 0
+
+	var argPlaceholders []string
+	for i < len(args) {
+		argPlaceholders = append(argPlaceholders, "?")
+		i += 1
+	}
+
+	conditionBody := fmt.Sprintf("%s IN (%s)", col, strings.Join(argPlaceholders, ", "))
+
+	return  Condition{conditionBody, args}
 }
 
 func ColEqCondition(col1 string, col2 string) Condition {

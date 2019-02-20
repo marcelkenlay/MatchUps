@@ -8,7 +8,7 @@ import (
 
 func CreateTeamChat(teamId int) error {
 
-	table_name := fmt.Sprintf("`team_messages`.`team%d", teamId)
+	table_name := fmt.Sprintf("chats.team%d", teamId)
 
 	sender_col := ColumnDefinition{Name:"user_id", Type: "integer", ForeignTable: USERS_TABLE}
 	message_col := ColumnDefinition{Name:"message", Type: "varchar(200)"}

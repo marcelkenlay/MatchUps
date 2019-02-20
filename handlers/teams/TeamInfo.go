@@ -11,7 +11,7 @@ import (
 func IsTeamNameAvailable(teamName string) bool {
 
 	teamName = strings.ToUpper(teamName)
-	conditions := []Condition{SingleValCondition(fmt.Sprintf("UPPER(%s) = ?", teamName), teamName)}
+	conditions := []Condition{SingleValCondition(fmt.Sprintf("UPPER(%s) = ?", TEAM_NAME_COL), teamName)}
 
 	num, err := CountMatchingRows(TEAMS_TABLE_NAME, conditions)
 

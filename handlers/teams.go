@@ -17,9 +17,8 @@ import (
 )
 
 type NewTeamInfo struct {
-	TeamName         string
-	CaptainID        int
-	InviteeUsernames []string
+	TeamName string
+	Invitees []int
 }
 
 var AddNewTeam = http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
@@ -59,9 +58,7 @@ var AddNewTeam = http.HandlerFunc(func(writer http.ResponseWriter, request *http
 
 	_ = AddTeamAvailability(teamId)
 
-	ids := GetIdsForUsernames(teamInfo.InviteeUsernames)
-
-	_ = AddTeamInvitations(teamId, ids)
+	_ = AddTeamInvitations(teamId, teamInfo.Invitees)
 
 	_ = CreateTeamChat(teamId)
 

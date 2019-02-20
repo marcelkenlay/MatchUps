@@ -19,7 +19,6 @@ const cookies = new Cookies();
 
 const sessionIdKey = 'UserSessionId';
 const sessionHashKey = 'UserSessionHash';
-const GOOGLE_MAPS_KEY = process.env.GOOGLE_MAPS_KEY;
 
 
 class Profile extends Component {

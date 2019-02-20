@@ -5,8 +5,13 @@ import (
 	"strings"
 )
 
+func cleanName(name string) string {
+	return strings.Replace(name, ".", "_", -1)
+}
+
 func CreateTable(name string, columns []ColumnDefinition, primaryColumns []ColumnDefinition) error {
 	var columnDefs []string
+	cleanName := cleanName(name)
 	for _, column := range columns {
 		var columnDef []string
 
@@ -24,7 +29,7 @@ func CreateTable(name string, columns []ColumnDefinition, primaryColumns []Colum
 
 		if column.ForeignTable != "" {
 			fkConstraint := fmt.Sprintf("constraint %s_%s_%s_fk references %s",
-				name, column.ForeignTable, column.Name, column.ForeignTable)
+				cleanName, column.ForeignTable, column.Name, column.ForeignTable)
 			columnDef = append(columnDef, fkConstraint)
 		}
 
@@ -38,7 +43,7 @@ func CreateTable(name string, columns []ColumnDefinition, primaryColumns []Colum
 		}
 
 		fkConstraint := fmt.Sprintf("constraint %s_fk unique (%s)",
-			name, strings.Join(primaryColumnNames, ","))
+			cleanName, strings.Join(primaryColumnNames, ","))
 
 		columnDefs = append(columnDefs, fkConstraint)
 	}

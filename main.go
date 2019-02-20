@@ -63,7 +63,7 @@ func main() {
 
 	//Create Team Page
 	r.Handle("/getUsernameMatches", GetUsernameMatches).Methods("GET")
-	r.Handle("/createTeam", AddNewTeam).Methods("POST")
+	r.Handle("/createTeam/{sessionId}/{sessionHash}", AddNewTeam).Methods("POST")
 	r.Handle("/sendInvitations", SendInvitations).Methods("POST")
 
 	// Login
