@@ -1,73 +1,78 @@
 package handlers
 
 import (
-	. "./utils"
+	. "./chats"
 	. "./db"
+	. "./teams"
+	. "./users"
+	. "./utils"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
+	"log"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 )
 
-type Team struct {
-	ID      int      `json:"id"`
-	NAME    string   `json:"name"`
-	IMAGE   string   `json:"image"`
-	PLAYERS []Player `json:"players"`
+type NewTeamInfo struct {
+	TeamName         string
+	CaptainID        int
+	InviteeUsernames []string
 }
 
-type Player struct {
-	NAME     string   `json:"name"`
-	IMAGE    string   `json:"image"`
-	LOCATION Location `json:"location"`
-}
+var AddNewTeam = http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+	decoder := json.NewDecoder(request.Body)
+	var teamInfo NewTeamInfo
+	err := decoder.Decode(&teamInfo)
 
-type Location struct {
-	LAT string `json:"lat"`
-	LNG string `json:"lng"`
-}
+	if err != nil {
+		panic(err)
+	}
+
+	userSessionCookie := BuildUserSessionFromRequest(request)
+
+	if !IsTeamNameAvailable(teamInfo.TeamName) {
+		_, _ = fmt.Fprintln(writer, -1)
+		return
+	}
+
+	teamId, err := AddNewTeamAndRetrieveId(teamInfo.TeamName)
+
+	if err != nil {
+		log.Println("Error adding team: ", teamId)
+		_, _ = fmt.Fprintln(writer, -1)
+		return
+	}
+
+	userId := GetUserIdFromSession(userSessionCookie)
+
+	_ = AddMemberToTeam(teamId, userId)
+
+	_ = AddTeamCaptain(teamId, userId)
+
+	var location Location
+	location.LAT, location.LNG = GetUserLatLngFromId(userId)
+
+	_ = AddTeamLocation(teamId, location)
+
+	_ = AddTeamAvailability(teamId)
+
+	_ = CreateTeamChat(teamId)
+
+	_, _ = fmt.Fprintln(writer, teamId) // Write team id to signal success to the sender
+})
 
 var GetTeams = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	//get username
-	teams := []Team{}
-	user_id := mux.Vars(r)["user_id"]
-	query := fmt.Sprintf(
-		"SELECT team_id, team_name "+
-			"FROM team_members "+
-			"NATURAL INNER JOIN team_names "+
-			"WHERE team_members.user_id=%s;", user_id)
-	rows, err := Database.Query(query)
-	CheckErr(err)
+	userSessionCookie := BuildUserSessionFromRequest(r)
 
-	for rows.Next() {
-		team := Team{}
-		err := rows.Scan(&team.ID, &team.NAME)
-		CheckErr(err)
-		query = fmt.Sprintf("SELECT username,users.loc_lat,users.loc_lng "+
-			"FROM team_members "+
-			"JOIN users on team_members.user_id=users.user_id "+
-			"where team_members.team_id=%d;", team.ID)
-		users, err := Database.Query(query)
-		players := []Player{}
-		//for each player retrieve location
-		for users.Next() {
-			player := Player{}
-			loc := Location{}
-			err := users.Scan(&player.NAME, &loc.LAT, &loc.LNG)
-			CheckErr(err)
-			player.LOCATION = loc
-			players = append(players, player)
-		}
-		team.PLAYERS = players
-		teams = append(teams, team)
-	}
+	teams := GetUsersTeams(userSessionCookie)
+
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	json.NewEncoder(w).Encode(teams)
+	err := json.NewEncoder(w).Encode(teams)
+	CheckErr(err)
 })
 
 var GetInvitations = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -136,98 +141,6 @@ var GetUsernameMatches = http.HandlerFunc(func(writer http.ResponseWriter, reque
 
 	j, _ := json.Marshal(result)    // Convert the list of DB hits to a JSON
 	fmt.Fprintln(writer, string(j)) // Write the result to the sender
-})
-
-type TeamInfo struct {
-	TeamName  string
-	CaptainID int
-}
-
-//todo set up MUX router to take url of user and team to add to database.
-var AddTeam = http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-	decoder := json.NewDecoder(request.Body)
-	var teamInfo TeamInfo
-	err := decoder.Decode(&teamInfo)
-	if err != nil {
-		panic(err)
-		defer request.Body.Close()
-	}
-
-	// Check that team name is unique
-	query := fmt.Sprintf("SELECT COUNT(*) FROM team_names WHERE UPPER(team_name)='%s';",
-		strings.ToUpper(teamInfo.TeamName))
-	rows, err := Database.Query(query)
-	CheckErr(err)
-
-	// Parse count
-	rows.Next()
-	var count string
-	err = rows.Scan(
-		&count)
-	num, err := strconv.Atoi(count)
-	if (num > 0) {
-		fmt.Fprintln(writer, -1) // Write whether successful to the sender
-		return
-	}
-
-	// Add Team name Record
-	query = fmt.Sprintf("INSERT INTO team_names (team_name) VALUES('%s');",
-		teamInfo.TeamName);
-	rows, err = Database.Query(query)
-	CheckErr(err)
-
-	// Get ID for Team
-	query = fmt.Sprintf("SELECT team_id FROM team_names WHERE team_name='%s';",
-		teamInfo.TeamName)
-	rows, err = Database.Query(query)
-	rows.Next()
-	var team_id int
-	err = rows.Scan(&team_id)
-	CheckErr(err)
-
-	// Add team to team_locations
-	query = fmt.Sprintf("INSERT INTO team_locations (team_id, loc_lat, loc_lng) VALUES (%d, 0.0, 0.0);", team_id)
-	_, err = Database.Query(query)
-	CheckErr(err)
-
-	// Add Team Captain
-	query = fmt.Sprintf("INSERT INTO team_captains (user_id, team_id) VALUES(%d, %d);",
-		teamInfo.CaptainID, team_id)
-	_, err = Database.Query(query)
-	CheckErr(err)
-
-	RecalculateTeamLocation(team_id)
-
-	// Add to team_avail
-	// Run query to add user's default availability to DB
-	query = fmt.Sprintf("INSERT INTO team_avail VALUES (%d);", team_id)
-	_, err = Database.Query(query)
-	CheckErr(err)
-
-	RecalculateTeamAvailability(team_id)
-
-	// Add captain as team member
-	query = fmt.Sprintf("INSERT INTO team_members (user_id, team_id) VALUES(%d, %d);",
-		teamInfo.CaptainID, team_id)
-	_, err = Database.Query(query)
-	CheckErr(err)
-
-	//TODO: USE THIS FORMAT
-	// CREATE  TABLE IF NOT EXISTS `chats`.`chat_user` (
-	//	`id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
-	//	`handle` VARCHAR(45) NOT NULL ,
-	//	PRIMARY KEY (`id`) )
-	//ENGINE = InnoDB;
-
-
-	//Create message table for team
-	table_name := fmt.Sprintf("_team%d_messages", team_id)
-	columns := "sender_id integer NOT NULL, message varchar(200) NOT NULL, Time_sent timestamp without time zone NOT NULL"
-	query = fmt.Sprintf("CREATE TABLE %s (%s);", table_name, columns)
-	_, err = Database.Query(query)
-	CheckErr(err)
-
-	fmt.Fprintln(writer, team_id) // Write whethersuccessful to the sender
 })
 
 type TeamInvInfo struct {

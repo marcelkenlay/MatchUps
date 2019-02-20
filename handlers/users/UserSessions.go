@@ -33,7 +33,7 @@ func BuildUserSessionFromRequest(request *http.Request) UserSessionCookie {
 
 
 func GetUserIdFromSession(userSession UserSessionCookie) int {
-	columns := []string{USER_ID, COOKIE_HASH}
+	columns := []string{USER_ID_COL, COOKIE_HASH}
 
 	conditions := []Condition{SingleValCondition(fmt.Sprintf("%s = ?",SESSION_ID), userSession.ID)}
 
@@ -51,7 +51,7 @@ func GetUserIdFromSession(userSession UserSessionCookie) int {
 }
 
 func InsertUserSession(userId int, sessionCookieHash string) (int, error) {
-	columns := []string{USER_ID, COOKIE_HASH}
+	columns := []string{USER_ID_COL, COOKIE_HASH}
 	args := []interface{}{userId, sessionCookieHash}
 
 	sessionId, err := InsertRowIntoTableAndRetreiveVal(USER_SESSIONS_TABLE, columns, args, SESSION_ID)

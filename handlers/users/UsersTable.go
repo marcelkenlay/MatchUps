@@ -29,33 +29,33 @@ type UserInfoInput struct {
 }
 
 // Users table
-var USERS_TABLE = "users"
-var ID = "user_id"
-var USERNAME = "username"
-var NAME = "name"
-var DOB = "dob"
-var LOC_LAT = "loc_lat"
-var LOC_LNG = "loc_lng"
-var PWD_HASH = "pwd_hash"
-var SCORE = "score"
+const USERS_TABLE = "users"
+const USER_ID_COL = "user_id"
+const USERNAME_COL = "username"
+const NAME_COL = "name"
+const DOB_COL = "dob"
+const LOC_LAT_COL = "loc_lat"
+const LOC_LNG_COL = "loc_lng"
+const PWD_HASH_COL = "pwd_hash"
+const SCORE_COL = "score"
 
 func InsertUserIntoDB(userInfo UserInfoInput, password string) UserSessionCookie {
 	hashedPwd := HashPassword(password)
 
-	columns := []string{USERNAME, NAME, DOB, LOC_LAT, LOC_LNG, PWD_HASH}
+	columns := []string{USERNAME_COL, NAME_COL, DOB_COL, LOC_LAT_COL, LOC_LNG_COL, PWD_HASH_COL}
 	args := []interface{}{
 		userInfo.Username, userInfo.Name, userInfo.Dob,
 		userInfo.LocLat, userInfo.LocLng, hashedPwd}
 
-	id, _ := InsertRowIntoTableAndRetreiveVal(USERS_TABLE, columns, args, USER_ID)
+	id, _ := InsertRowIntoTableAndRetreiveVal(USERS_TABLE, columns, args, USER_ID_COL)
 	idNum, _ := strconv.Atoi(id)
 	return GenerateSessionCookie(idNum)
 }
 
 func CheckUserLogin(userLoginAttempt UserLoginAttempt) UserLoginReturn {
 
-	columns := []string{USER_ID, PWD_HASH}
-	conditions := []Condition{SingleValCondition(fmt.Sprintf("%s = ?", USERNAME), userLoginAttempt.Username)}
+	columns := []string{USER_ID_COL, PWD_HASH_COL}
+	conditions := []Condition{SingleValCondition(fmt.Sprintf("%s = ?", USERNAME_COL), userLoginAttempt.Username)}
 
 	row, err := SelectRowFromTable(USERS_TABLE, columns, conditions)
 
@@ -83,42 +83,39 @@ func CheckUserLogin(userLoginAttempt UserLoginAttempt) UserLoginReturn {
 }
 
 func IsUsernameInUse(username string) bool {
-	conditions := []Condition{SingleValColEqCondition(USERNAME, username)}
-	columns := []string{"COUNT(*)"}
+	conditions := []Condition{SingleValColEqCondition(USERNAME_COL, username)}
 
-	row, err := SelectRowFromTable(USERS_TABLE, columns, conditions)
+	count, err := CountMatchingRows(USERS_TABLE, conditions)
 
 	if err != nil {
 		log.Println("Failed to query for count result")
 		return true
 	}
 
-	var count string
-	err = row.Scan(&count)
-
-	if err != nil {
-		log.Println("Failed to extract count result")
-		return true
-	}
-
-	num, _ := strconv.Atoi(count)
-
-	return num > 0
+	return count > 0
 }
 
 func GetUserLocationInfo(userSession UserSessionCookie) string {
 	userId := GetUserIdFromSession(userSession)
 
-	columns := []string{LOC_LAT, LOC_LNG}
+	locLat, locLng := GetUserLatLngFromId(userId)
 
-	conditions := []Condition{SingleValColEqCondition(USER_ID, userId)}
+	locLatS, locLngS := fmt.Sprintf("%f", locLat) , fmt.Sprintf("%f", locLng)
+
+	return GetAddressForLatLng(locLatS, locLngS)
+}
+
+func GetUserLatLngFromId(userId int) (float64, float64) {
+	columns := []string{LOC_LAT_COL, LOC_LNG_COL}
+
+	conditions := []Condition{SingleValColEqCondition(USER_ID_COL, userId)}
 
 	row, err := SelectRowFromTable(USERS_TABLE, columns, conditions)
 	CheckErr(err)
 
-	var locLng, locLat string
+	var locLng, locLat float64
 
 	err = row.Scan(&locLat, &locLng)
 
-	return GetAddressForLatLng(locLat, locLng)
+	return locLat, locLng
 }

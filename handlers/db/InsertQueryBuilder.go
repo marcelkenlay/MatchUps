@@ -1,7 +1,6 @@
 package db
 
 import (
-	"errors"
 	"fmt"
 	sq "github.com/Masterminds/squirrel"
 	_ "github.com/lib/pq"
@@ -18,11 +17,7 @@ func InsertRowIntoTableAndRetreiveVal(table string, columns []string, vals []int
 
 func InsertRowIntoTableAndRetreiveVals(table string, columns []string, vals []interface{}, retrieve []string) ([]string, error) {
 
-	qb, err := buildInsertQuery(table, columns, vals)
-
-	if err != nil {
-		return nil, err
-	}
+	qb := buildInsertRowQuery(table, columns, vals)
 
 	qb = qb.Suffix(fmt.Sprintf("RETURNING \"%s\"", strings.Join(retrieve, " , ")))
 
@@ -52,30 +47,42 @@ func InsertRowIntoTableAndRetreiveVals(table string, columns []string, vals []in
 }
 
 func InsertRowIntoTable(table string, columns []string, vals []interface{}) error {
-
-	qb, err := buildInsertQuery(table, columns, vals)
+	psql, args, err := buildInsertRowQuery(table, columns, vals).ToSql()
 
 	if err != nil {
 		return err
 	}
-
-	psql, args, err := qb.ToSql()
 
 	_, err = Database.Query(psql, args...)
 
 	return err
 }
 
-func buildInsertQuery(table string, columns []string, vals []interface{}) (qb sq.InsertBuilder, err error) {
-	qb = QueryBuilder().Insert(table)
+func InsertRowsIntoTable(table string, columns []string, vals [][]interface{}) error {
+	psql, args, err :=  buildInsertRowsQuery(table, columns, vals).ToSql()
 
-	if len(columns) != len(vals) {
-		print("Columns and values lengths do not match")
-		err = errors.New("columns and values lengths do not match")
-		return
+	if err != nil {
+		return err
 	}
 
-	qb = qb.Columns(columns...).Values(vals...)
+	_, err = Database.Query(psql, args...)
 
-	return
+	return err
+}
+
+func buildInsertRowQuery(table string, columns []string, vals []interface{}) sq.InsertBuilder {
+	return buildInsertRowsQuery(table, columns, [][]interface{}{vals})
+}
+
+
+func buildInsertRowsQuery(table string, columns []string, vals [][]interface{}) sq.InsertBuilder {
+	qb := QueryBuilder().Insert(table)
+
+	qb = qb.Columns(columns...)
+
+	for _, val := range vals {
+		qb = qb.Values(val...)
+	}
+
+	return qb
 }

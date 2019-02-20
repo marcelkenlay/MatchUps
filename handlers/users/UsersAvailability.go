@@ -6,13 +6,12 @@ import (
 )
 
 var USER_AVAIL_TABLE = "user_availability"
-var USER_ID = "user_id"
 
 func InsertUserDefaultAvailIntoDB(userSession UserSessionCookie) {
 
 	userId := GetUserIdFromSession(userSession)
 
-	columns := []string{USER_ID}
+	columns := []string{USER_ID_COL}
 	vals :=   []interface{}{userId}
 
 	_ = InsertRowIntoTable(USER_AVAIL_TABLE, columns, vals)

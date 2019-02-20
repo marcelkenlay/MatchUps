@@ -12,6 +12,26 @@ func SelectEntireRowFromTable(table string, conditions []Condition)  (row *sql.R
 	return SelectRowFromTable(table, []string{"*"}, conditions)
 }
 
+func CountMatchingRows(table string, conditions []Condition) (count int, err error) {
+	row, err := SelectRowFromTable(table, []string{"COUNT(*)"}, conditions)
+
+	if err != nil {
+		return -1,err
+	}
+
+	err = row.Scan(&count)
+
+	if err != nil {
+		return -1,err
+	}
+
+	if err != nil || count > 0 {
+		return -1,err
+	}
+
+	return
+}
+
 func SelectRowFromTable(table string, columns []string, conditions []Condition)  (row *sql.Row, err error) {
 	return BuildSelectFromWhere(columns, []Table{TableNoAlias(table)}, conditions).SelectRow()
 }

@@ -10,6 +10,14 @@ type Condition struct {
 	values    []interface{}
 }
 
+type ColumnDefinition struct {
+	Name         string
+	Type		 string
+	Nullable     bool
+	AutoInc      bool
+	ForeignTable string
+}
+
 func TableColumn(table Table, col string) string {
 	if table.alias == "" {
 		return fmt.Sprintf("%s.%s", table.name, col)
