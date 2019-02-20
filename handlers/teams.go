@@ -59,6 +59,10 @@ var AddNewTeam = http.HandlerFunc(func(writer http.ResponseWriter, request *http
 
 	_ = AddTeamAvailability(teamId)
 
+	ids := GetIdsForUsernames(teamInfo.InviteeUsernames)
+
+	_ = AddTeamInvitations(teamId, ids)
+
 	_ = CreateTeamChat(teamId)
 
 	_, _ = fmt.Fprintln(writer, teamId) // Write team id to signal success to the sender

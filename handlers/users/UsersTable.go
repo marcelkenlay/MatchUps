@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 )
 
 type UserLoginAttempt struct {
@@ -118,4 +119,32 @@ func GetUserLatLngFromId(userId int) (float64, float64) {
 	err = row.Scan(&locLat, &locLng)
 
 	return locLat, locLng
+}
+
+func GetIdsForUsernames(usernames []string) (ids []int) {
+	columns := []string{USER_ID_COL}
+
+	i := 0
+	var argPlaceholders []string
+	for i < len(usernames) {
+		argPlaceholders = append(argPlaceholders, "?")
+	}
+
+	conditionBody := fmt.Sprintf("%s IN (%s)", USERNAME_COL, strings.Join(argPlaceholders, ", "))
+	var args []interface{}
+	for _, username := range usernames {
+		args = append(args, username)
+	}
+
+	conditions := []Condition{{conditionBody, args}}
+
+	rows, _ := SelectRowsFromTable(USERS_TABLE, columns, conditions)
+
+	for rows.Next() {
+		var id int
+		_ = rows.Scan(&id)
+		ids = append(ids, id)
+	}
+
+	return ids
 }
