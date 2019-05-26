@@ -6,7 +6,6 @@ import PreviousFixtureCard from './Profile/PreviousFixtureCard';
 import UpcomingFixtureCard from './Profile/UpcomingFixtureCard';
 import WDLShow from './Profile/WDLShow';
 import StandaloneSearchBox from "react-google-maps/lib/components/places/StandaloneSearchBox";
-import Cookies from "universal-cookie";
 
 
 import './Stylesheets/master.css';
@@ -15,16 +14,10 @@ import './Stylesheets/Searchbox.css'
 
 const refs = {};
 
-const cookies = new Cookies();
-
-const sessionIdKey = 'UserSessionId';
-const sessionHashKey = 'UserSessionHash';
-
-
 class Profile extends Component {
 
     constructor(props) {
-        super(props)
+        super(props);
         this.state = {
             username: "",
             location: "",
@@ -36,14 +29,11 @@ class Profile extends Component {
             fixtures: [],
             upcoming: [],
             isEditing: false,
-            wdl: [0, 0, 0],
-            sessionId: cookies.get(sessionIdKey),
-            sessionHash: cookies.get(sessionHashKey)
+            wdl: [0, 0, 0]
         };
 
         this.onPlacesChanged = this.onPlacesChanged.bind(this)
     }
-
 
     // Searchbox init
     onSearchBoxMounted(ref) {
@@ -57,7 +47,6 @@ class Profile extends Component {
         var lastvisited = places[places.length - 1];
         var newlat = lastvisited.geometry.location.lat()
         var newlng = lastvisited.geometry.location.lng()
-        // console.log(lastvisited.formatted_address)
         var object = {
             position: {
                 lat: newlat,
@@ -71,7 +60,7 @@ class Profile extends Component {
             '/updateuserloc?username=' + UserProfile.getName()
             + '&lat=' + newlat
             + '&lng=' + newlng).then(function (response) {
-            if (response.data == "fail\n") {
+            if (response.data === "fail\n") {
                 alert("Failed to find location, please try again.")
             } else {
                 var tick = document.getElementById('searchtick');
@@ -87,7 +76,7 @@ class Profile extends Component {
         // Query DB
         var _this = this;
         var username = UserProfile.getName();
-        axios.get('/getuserlocation/' + this.state.sessionId + "/" + this.state.sessionHash)
+        axios.get('/getuserlocation')
             .then(function (response) {
                 console.log(response);
                 _this.setState({location: response.data['location']});
@@ -136,7 +125,7 @@ class Profile extends Component {
         for (var i = 0; i < this.state.fixtures.length; i++) {
             var fixture = this.state.fixtures[i];
 
-            if (fixture.ScoreHome == fixture.ScoreAway) {
+            if (fixture.ScoreHome === fixture.ScoreAway) {
                 d++;
                 continue;
             }
@@ -243,7 +232,6 @@ class Profile extends Component {
                     <div class="AvTable">
                         <AvailabiltyTable/>
                     </div>
-
 
                 </div>
             </div>

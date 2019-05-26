@@ -18,8 +18,8 @@ func main() {
 	r := mux.NewRouter()
 
 	// Profile page
-	r.Handle("/getuserlocation/{sessionId}/{sessionHash}", GetUserLocation).Methods("GET")
-	r.Handle("/getuserfixtures/{userSession}", GetUserFixtures).Methods("GET")
+	r.Handle("/getuserlocation", GetUserLocation).Methods("GET")
+	r.Handle("/getuserfixtures", GetUserFixtures).Methods("GET")
 	r.Handle("/getuseravail", GetUserAvailability).Methods("GET")
 	r.Handle("/updateuseravail", UpdateUserAvailability).Methods("GET")
 	r.Handle("/getuserupcoming", GetUserUpcoming).Methods("GET")
@@ -63,7 +63,7 @@ func main() {
 
 	//Create Team Page
 	r.Handle("/getUsernameMatches", GetUsernameMatches).Methods("GET")
-	r.Handle("/createTeam/{sessionId}/{sessionHash}", AddNewTeam).Methods("POST")
+	r.Handle("/createTeam", AddNewTeam).Methods("POST")
 	r.Handle("/sendInvitations", SendInvitations).Methods("POST")
 
 	// Login

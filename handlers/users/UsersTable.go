@@ -69,11 +69,11 @@ func CheckUserLogin(userLoginAttempt UserLoginAttempt) UserLoginReturn {
 		// If error then no entry was found in the database for the username given
 		userLoginReturn.UserSessionCookie = UserSessionCookie{}
 		log.Println(err)
-		userLoginReturn.Error = "User Not Found"
+		userLoginReturn.Error = "Invalid Login Details"
 	} else if !ComparePasswords(correctPwdHash, []byte(userLoginAttempt.Password)) {
 		// If compare passwords returns false then we have an incorrect password attempt
 		userLoginReturn.UserSessionCookie = UserSessionCookie{}
-		userLoginReturn.Error = "Incorrect Password"
+		userLoginReturn.Error = "Invalid Login Details"
 	} else {
 		// ComparePasswords returned true, username and password therefore valid
 		userLoginReturn.UserSessionCookie = GenerateSessionCookie(userId)

@@ -3,7 +3,6 @@ package users
 import (
 	. "../db"
 	"fmt"
-	"github.com/gorilla/mux"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	mr "math/rand"
@@ -13,7 +12,7 @@ import (
 )
 
 type UserSessionCookie struct {
-	ID int
+	ID   int
 	Hash string
 }
 
@@ -23,19 +22,28 @@ var COOKIE_HASH = "cookie_hash"
 var SESSION_ID = "session_id"
 
 func BuildUserSessionFromRequest(request *http.Request) UserSessionCookie {
-	id, err := strconv.Atoi(mux.Vars(request)["sessionId"])
-	if err != nil {
-		log.Println("Error reading session id from request")
+	var sessionId, sessionHash string
+	for _, cookie := range request.Cookies() {
+		switch cookie.Name {
+		case "UserSessionId":
+			sessionId = cookie.Value
+			break
+		case "UserSessionHash":
+			sessionHash = cookie.Value
+			break
+		}
 	}
-	hash := mux.Vars(request)["sessionHash"]
-	return UserSessionCookie{ID: id, Hash: hash}
+	if sessionId == "" || sessionHash == "" {
+		log.Println("Error reading session from request")
+	}
+	sessionIdI, _ := strconv.Atoi(sessionId)
+	return UserSessionCookie{ID: sessionIdI, Hash: sessionHash}
 }
-
 
 func GetUserIdFromSession(userSession UserSessionCookie) int {
 	columns := []string{USER_ID_COL, COOKIE_HASH}
 
-	conditions := []Condition{SingleValCondition(fmt.Sprintf("%s = ?",SESSION_ID), userSession.ID)}
+	conditions := []Condition{SingleValCondition(fmt.Sprintf("%s = ?", SESSION_ID), userSession.ID)}
 
 	row, _ := SelectRowFromTable(USER_SESSIONS_TABLE, columns, conditions)
 
